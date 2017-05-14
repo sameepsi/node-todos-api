@@ -11,7 +11,8 @@ const todos = [{
 },
 {
   _id:new ObjectID(),
-  text:'Second test todo'
+  text:'Second test todo',
+  completed: true
 }];
 
 //lifecycle method to run before each test runs
@@ -144,4 +145,49 @@ it('Should return status code 404 for valid object id but not in db', (done) => 
   .expect(404)
   .end(done);
 });
+});
+
+describe("PATCH /todos/:id", () => {
+  it('Should update todo as completed', (done) => {
+    supertest(app)
+    .patch(`/todos/${todos[0]._id.toHexString()}`)
+    .send({completed:true})
+    .expect(200)
+    .expect((res) => {
+      expect(res.body.todo.completed).toEqual(true);
+    })
+    .end((err, res) => {
+      if(err){
+        return done(err);
+      }
+      Todo.findById(res.body.todo._id).then((todo) => {
+          expect(todo.completed).toEqual(true);
+          expect(todo.completedAt).toBeA('number').toNotEqual(null);
+          done();
+      }).catch((e)=>{
+        done(e);
+      })
+    })
+  });
+
+  it('Should change completed value of todo to false', (done) => {
+    supertest(app)
+    .patch(`/todos/${todos[1]._id.toHexString()}`)
+    .send({completed: false})
+    .expect(200)
+    .expect((res) => {
+      expect(res.body.todo.completed).toEqual(false);
+      expect(res.body.todo.completedAt).toEqual(null);
+    })
+    .end((err, res) => {
+      if(err){
+        return done(err);
+      }
+      Todo.findById(res.body.todo._id).then((todo) => {
+        expect(todo.completed).toEqual(false);
+        expect(todo.completedAt).toEqual(null);
+        done();
+      }).catch((e)=>done(e));
+    })
+  } );
 });
