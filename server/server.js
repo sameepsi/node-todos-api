@@ -1,5 +1,5 @@
 const express = require('express');
-const {ObjectId} = require('mongodb');
+const {ObjectID} = require('mongodb');
 var bodyParser = require('body-parser');
 
 var {mongoose} = require('./db/mongoose');
@@ -38,7 +38,7 @@ app.get('/todos', (req, res) => {
 
 app.get('/todos/:id',(req, res) => {
   var todo_id=req.params.id;
-  if(!todo_id || !ObjectId.isValid(todo_id)){
+  if(!todo_id || !ObjectID.isValid(todo_id)){
     return res.status(400).send('Please enter valid id');
 
   }
@@ -50,6 +50,21 @@ app.get('/todos/:id',(req, res) => {
   }).catch((e) => {
     res.status(400).send(e);
   });
+});
+
+app.delete('/todos/:id', (req,res)=>{
+  var todo_id=req.params.id;
+  if(!todo_id || !ObjectID.isValid(todo_id)){
+  return  res.status(404).send('Todo not found');
+  }
+  Todo.findByIdAndRemove(todo_id).then((todo) => {
+    if(!todo){
+      return res.status(404).send('Todo not found');
+    }
+    res.status(200).send({todo});
+  }).catch((e) => {
+    res.status(400).send(e);
+  })
 });
 
 app.listen(port,()=>{
