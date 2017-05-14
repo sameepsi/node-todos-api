@@ -108,3 +108,40 @@ it('Should get 400 status for invalid ids', (done) => {
 });
 
 });
+
+describe('DELETE /todos/:id', ()=>{
+
+  it('Should delete todo correspoding to the id', (done) => {
+    supertest(app)
+    .delete(`/todos/${todos[0]._id.toHexString()}`)
+    .expect(200)
+    .expect((res)=>{
+      expect(res.body.todo._id).toEqual(todos[0]._id);
+    })
+    .end((err, resp) => {
+      if(err){
+        return done(err);
+      }
+      Todo.findById(todos[0]._id).then((todo) => {
+        expect(todo).toBe(null);
+        done();
+      }).catch((e) => {
+        done(e);
+      })
+    })
+  });
+
+  it('Should return status code 404 for invalid object id', (done) => {
+    supertest(app)
+    .delete('/todos/123')
+    .expect(404)
+    .end(done);
+  });
+
+it('Should return status code 404 for valid object id but not in db', (done) => {
+  supertest(app)
+  .delete(`/todos/${new ObjectID().toHexString()}`)
+  .expect(404)
+  .end(done);
+});
+});
