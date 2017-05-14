@@ -1,13 +1,16 @@
 const expect = require('expect');
 const supertest = require('supertest');
+const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 
 const todos = [{
+  _id:new ObjectID(),
   text:'First test todo'
 },
 {
+  _id:new ObjectID(),
   text:'Second test todo'
 }];
 
@@ -76,4 +79,32 @@ describe('GET /todos', ()=>{
     })
     .end(done);
   });
+});
+
+describe('GET /todos/:id', () => {
+
+it('Should get todo on the basis of id', (done) => {
+  supertest(app)
+  .get(`/todos/${todos[0]._id.toHexString()}`)
+  .expect(200)
+  .expect((res) => {
+    expect(res.body.todo.text).toEqual(todos[0].text)
+  })
+  .end(done);
+});
+
+it('Should get 404 status for valid id but not found in db', (done) => {
+      supertest(app)
+      .get(`/todos/${new ObjectID().toHexString()}`)
+      .expect(404)
+      .end(done);
+});
+
+it('Should get 400 status for invalid ids', (done) => {
+  supertest(app)
+  .get(`/todos/123`)
+  .expect(400)
+  .end(done);
+});
+
 });
