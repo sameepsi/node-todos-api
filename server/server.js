@@ -1,18 +1,10 @@
-var env=process.env.NODE_ENV || 'development';
-console.log(`env ***** ${env}`);
-if(env === 'development'){
-  process.env.PORT=3000;
-  process.env.MONGODB_URI='mongodb://localhost:27017/TodoApp';
-} else if(env === 'test'){
-process.env.PORT=3000;
-process.env.MONGODB_URI='mongodb://localhost:27017/TodoAppTest';
-
-}
+require('./config/config')
 
 const express = require('express');
 const {ObjectID} = require('mongodb');
 const bodyParser = require('body-parser');
 const _ = require('lodash');
+
 
 var {mongoose} = require('./db/mongoose');
 var {User} = require('./models/user');
@@ -37,6 +29,20 @@ app.post('/todos',(req, res) => {
     res.send(err);
   });
 });
+
+//To create new users
+app.post('/users', (req, res) => {
+  var body = _.pick(req.body, ['email','password']);
+  var user=new User(body);
+  user.save().then((doc) => {
+    res.status(201);
+    res.send(doc);
+  }, (err) => {
+    res.status(400);
+    res.send(err);
+  });
+});
+
 
 app.get('/todos', (req, res) => {
   Todo.find().then((todos) => {
