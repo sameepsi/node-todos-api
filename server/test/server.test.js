@@ -77,6 +77,7 @@ describe('GET /todos/:id', () => {
 it('Should get todo on the basis of id', (done) => {
   supertest(app)
   .get(`/todos/${todos[0]._id.toHexString()}`)
+  .set('x-auth', users[0].tokens[0].token)
   .expect(200)
   .expect((res) => {
     expect(res.body.todo.text).toEqual(todos[0].text)
@@ -87,6 +88,7 @@ it('Should get todo on the basis of id', (done) => {
 it('Should get 404 status for valid id but not found in db', (done) => {
       supertest(app)
       .get(`/todos/${new ObjectID().toHexString()}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(done);
 });
@@ -94,6 +96,7 @@ it('Should get 404 status for valid id but not found in db', (done) => {
 it('Should get 400 status for invalid ids', (done) => {
   supertest(app)
   .get(`/todos/123`)
+  .set('x-auth', users[0].tokens[0].token)
   .expect(400)
   .end(done);
 });
@@ -105,6 +108,7 @@ describe('DELETE /todos/:id', ()=>{
   it('Should delete todo correspoding to the id', (done) => {
     supertest(app)
     .delete(`/todos/${todos[0]._id.toHexString()}`)
+    .set('x-auth', users[0].tokens[0].token)
     .expect(200)
     .expect((res)=>{
       expect(res.body.todo._id).toEqual(todos[0]._id);
@@ -125,6 +129,7 @@ describe('DELETE /todos/:id', ()=>{
   it('Should return status code 404 for invalid object id', (done) => {
     supertest(app)
     .delete('/todos/123')
+    .set('x-auth', users[0].tokens[0].token)
     .expect(404)
     .end(done);
   });
@@ -132,6 +137,7 @@ describe('DELETE /todos/:id', ()=>{
 it('Should return status code 404 for valid object id but not in db', (done) => {
   supertest(app)
   .delete(`/todos/${new ObjectID().toHexString()}`)
+  .set('x-auth', users[0].tokens[0].token)
   .expect(404)
   .end(done);
 });
@@ -141,6 +147,7 @@ describe("PATCH /todos/:id", () => {
   it('Should update todo as completed', (done) => {
     supertest(app)
     .patch(`/todos/${todos[0]._id.toHexString()}`)
+    .set('x-auth', users[0].tokens[0].token)
     .send({completed:true})
     .expect(200)
     .expect((res) => {
@@ -163,6 +170,7 @@ describe("PATCH /todos/:id", () => {
   it('Should change completed value of todo to false', (done) => {
     supertest(app)
     .patch(`/todos/${todos[1]._id.toHexString()}`)
+    .set('x-auth', users[1].tokens[0].token)
     .send({completed: false})
     .expect(200)
     .expect((res) => {
@@ -276,7 +284,7 @@ describe('POST /users/login', () => {
       }
 
       User.findById(users[1]._id).then((user) => {
-          expect(user.tokens[0]).toInclude({
+          expect(user.tokens[1]).toInclude({
             access: 'auth',
             token: res.headers['x-auth']
           });
