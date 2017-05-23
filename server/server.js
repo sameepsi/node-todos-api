@@ -73,6 +73,14 @@ app.post('/users/login', (req, res) => {
   });
 });
 
+app.delete('/users/me/token', authenticate, (req, res) => {
+  req.user.removeToken(req.token).then(() => {
+    res.status(200).send();
+  }).catch((e) => {
+    res.status(400).send();
+  })
+});
+
 app.get('/todos/:id',(req, res) => {
   var todo_id=req.params.id;
   if(!todo_id || !ObjectID.isValid(todo_id)){
